@@ -23,6 +23,7 @@ async function run() {
     await client.connect();
     const serviceCollection = client.db("manufacturer_website").collection("services");
     const reviewCollection = client.db("manufacturer_website").collection("reviews");
+    const orderCollection = client.db("manufacturer_website").collection("orders");
 
     // get services collection data
     app.get("/service", async (req, res) => {
@@ -46,6 +47,13 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const service = await serviceCollection.findOne(query);
       res.send(service);
+    })
+
+    // post order that was confirmed by user
+    app.post('/order', async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
+      res.send({ success: true, result });
     })
 
   } finally {
