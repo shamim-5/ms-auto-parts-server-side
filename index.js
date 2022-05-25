@@ -49,6 +49,18 @@ async function run() {
       res.send(service);
     });
 
+    // get user data filter by user email from order collection
+    app.get("/order", async (req, res) => {
+      const userEmail = req.query.email;
+      if (userEmail) {
+        const query = { email: userEmail };
+        const orders = await orderCollection.find(query).toArray();
+        return res.send(orders);
+      } else {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+    });
+
     // post order that was confirmed by user
     app.post("/order", async (req, res) => {
       const order = req.body;
