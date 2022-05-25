@@ -47,15 +47,19 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const service = await serviceCollection.findOne(query);
       res.send(service);
-    })
+    });
 
     // post order that was confirmed by user
-    app.post('/order', async (req, res) => {
+    app.post("/order", async (req, res) => {
       const order = req.body;
+      const query = { partsName: order.partsName, email: order.email };
+      const exists = await orderCollection.findOne(query);
+      if (exists) {
+        return res.send({ success: false, order: exists });
+      }
       const result = await orderCollection.insertOne(order);
-      res.send({ success: true, result });
-    })
-
+      return res.send({ success: true, result });
+    });
   } finally {
   }
 }
