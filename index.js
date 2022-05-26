@@ -18,12 +18,43 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "UnAuthorized access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 async function run() {
   try {
     await client.connect();
     const serviceCollection = client.db("manufacturer_website").collection("services");
     const reviewCollection = client.db("manufacturer_website").collection("reviews");
     const orderCollection = client.db("manufacturer_website").collection("orders");
+    const userCollection = client.db("manufacturer_website").collection("users");
+
+    // put method for userCollection where keep user data
+    // generate token and send client to set localStorage
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+      res.send({ result, token });
+    });
 
     // get services collection data
     app.get("/service", async (req, res) => {
@@ -50,7 +81,7 @@ async function run() {
     });
 
     // get user data filter by user email from order collection
-    app.get("/order", async (req, res) => {
+    app.get("/order", verifyJWT, async (req, res) => {
       const userEmail = req.query.email;
       if (userEmail) {
         const query = { email: userEmail };
@@ -61,7 +92,7 @@ async function run() {
       }
     });
 
-    // post order that was confirmed by user
+    // post order that was confirmed by user =>purchaseModal
     app.post("/order", async (req, res) => {
       const order = req.body;
       const query = { partsName: order.partsName, email: order.email };
