@@ -64,12 +64,31 @@ async function run() {
       res.send(services);
     });
 
+    // get user review  => myReview
+    // app.get("/review", verifyJWT, async (req, res) => {
+    //   const userEmail = req.query.email;
+    //   if (userEmail) {
+    //     const query = { email: userEmail };
+    //     const review = await reviewCollection.find(query).toArray();
+    //     return res.send(review);
+    //   } else {
+    //     return res.status(403).send({ message: "forbidden access" });
+    //   }
+    // });
+
     // get reviews collection data
     app.get("/review", async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
       const reviews = await cursor.toArray();
       res.send(reviews);
+    });
+
+    // post review that was confirmed by user => myReview
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send({ success: true, result });
     });
 
     // get single service
