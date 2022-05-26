@@ -80,7 +80,15 @@ async function run() {
       res.send(service);
     });
 
-    // get user data filter by user email from order collection
+    // DELETE myOrder => order delete on onclick
+    app.delete("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // myOrder => get user data filter by user email from order collection
     app.get("/order", verifyJWT, async (req, res) => {
       const userEmail = req.query.email;
       if (userEmail) {
