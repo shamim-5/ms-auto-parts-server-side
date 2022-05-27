@@ -40,6 +40,7 @@ async function run() {
     const reviewCollection = client.db("manufacturer_website").collection("reviews");
     const orderCollection = client.db("manufacturer_website").collection("orders");
     const userCollection = client.db("manufacturer_website").collection("users");
+    const addProductCollection = client.db("manufacturer_website").collection("products");
 
     // put method for userCollection where keep user data
     // generate token and send client to set localStorage
@@ -62,6 +63,22 @@ async function run() {
       const cursor = serviceCollection.find(query);
       const services = await cursor.toArray();
       res.send(services);
+    });
+
+    // get added products addedProducts =>
+    app.get("/product", async (req, res) => {
+      const query = {};
+      const cursor = addProductCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    //POST => addProduct => addProductCollection
+    app.post("/product", async (req, res) => {
+      // console.log(req.body);
+      const products = req.body;
+      const result = await addProductCollection.insertOne(products);
+      res.send({ success: true, result });
     });
 
     // get user review  => myReview
@@ -104,6 +121,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // DELETE manageProduct => product delete on onclick
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await addProductCollection.deleteOne(query);
       res.send(result);
     });
 
