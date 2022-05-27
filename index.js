@@ -143,6 +143,14 @@ async function run() {
         return res.status(403).send({ message: "forbidden access" });
       }
     });
+    
+    // manageOrder => get all user order
+    app.get("/order/all", async (req, res) => {
+      const query = {};
+      const cursor = orderCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // 1. allUser => get all user
     app.get("/user", verifyJWT, async (req, res) => {
