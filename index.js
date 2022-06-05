@@ -155,15 +155,13 @@ async function run() {
     });
 
     // manageOrder => get all user order
-    app.get("/order/all", async (req, res) => {
-      const query = {};
-      const cursor = orderCollection.find(query);
-      const result = await cursor.toArray();
+    app.get("/orders", async (req, res) => {
+      const result = await orderCollection.find().toArray();
       res.send(result);
     });
 
     // 1. allUser => get all user
-    app.get("/user", verifyJWT, async (req, res) => {
+    app.get("/user", async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
     });
