@@ -155,7 +155,7 @@ async function run() {
     });
 
     // manageOrder => get all user order
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyJWT, async (req, res) => {
       const result = await orderCollection.find().toArray();
       res.send(result);
     });
